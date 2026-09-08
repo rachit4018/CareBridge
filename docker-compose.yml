@@ -1,0 +1,47 @@
+# One command to a working environment: docker compose up
+#
+# Redis is here from the start even though nothing uses it until Sprint 4.
+# Adding infrastructure to a compose file mid-project is a papercut; having
+# it idle costs nothing.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: carebridge
+      POSTGRES_USER: carebridge
+      POSTGRES_PASSWORD: carebridge
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carebridge -d carebridge"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      POSTGRES_HOST: db
+      REDIS_URL: redis://redis:6379/0
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+
+volumes:
+  pgdata:

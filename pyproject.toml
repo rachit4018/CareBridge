@@ -1,0 +1,60 @@
+[project]
+name = "carebridge"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+# ---------------------------------------------------------------------- ruff
+# Lint and format in one tool. Replaces black + isort + flake8.
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = ["migrations", ".venv"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort — import ordering
+    "N",        # pep8-naming
+    "UP",       # pyupgrade — modern syntax
+    "B",        # bugbear — likely bugs
+    "DJ",       # flake8-django
+    "S",        # bandit — security
+    "T20",      # no print() left behind
+    "SIM",      # simplify
+]
+ignore = [
+    "S101",     # assert is fine in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S105", "S106"]          # hardcoded test passwords are fine
+"config/settings/*" = ["F403", "F405"]  # star imports are the settings idiom
+
+# ---------------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false      # tighten this as the codebase matures
+ignore_missing_imports = true
+exclude = ["migrations", ".venv"]
+
+[[tool.mypy.overrides]]
+module = "*.migrations.*"
+ignore_errors = true
+
+# -------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+addopts = "-q --strict-markers --reuse-db"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["apps", "config"]
+omit = ["*/migrations/*", "*/tests/*"]
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
