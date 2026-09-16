@@ -30,7 +30,7 @@ def test_superuser_has_staff_and_superuser_flags():
 def test_full_name_falls_back_to_email(user):
     user.first_name = ""
     user.last_name = ""
-    assert user.full_name == user.email
+    assert user.display_name == user.email
 
 
 # TODO (CB-5): add a test proving two users cannot share an email address,
