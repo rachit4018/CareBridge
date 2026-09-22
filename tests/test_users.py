@@ -15,7 +15,6 @@ def test_create_user_normalises_email():
     user = User.objects.create_user(email="Meera@Example.COM", password="x" * 12)
     assert user.email == "meera@example.com"
 
-
 def test_create_user_without_email_is_rejected():
     with pytest.raises(ValueError, match="email address"):
         User.objects.create_user(email="", password="x" * 12)
