@@ -85,5 +85,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
     @property
-    def full_name(self) -> str:
+    def display_name(self) -> str:
+
+        """Safe to render anywhere. Falls back to email when no name is set.
+        TODO: revisit once invitations exist. Showing an email where a name
+        belongs may disclose more than intended on shared screens.
+        """
         return f"{self.first_name} {self.last_name}".strip() or self.email
