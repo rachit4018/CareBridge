@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: Lint, types, tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: carebridge
+          POSTGRES_USER: carebridge
+          POSTGRES_PASSWORD: carebridge
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements/local.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Format check
+        run: ruff format --check .
+
+      - name: Type check
+        run: mypy apps config
+
+      - name: Check for missing migrations
+        # Fails if a model changed without a matching migration — the single
+        # most common thing to forget in a Django PR.
+        env:
+          POSTGRES_HOST: localhost
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Tests
+        env:
+          POSTGRES_HOST: localhost
+        run: pytest --cov --cov-report=term-missing
