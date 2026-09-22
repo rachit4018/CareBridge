@@ -31,8 +31,6 @@ def test_full_name_falls_back_to_email(user):
     user.first_name = ""
     user.last_name = ""
     assert user.display_name == user.email
-
-
 # TODO (CB-5): add a test proving two users cannot share an email address,
 # including the case where they differ only by letter case. Think about what
 # exception Django raises and at which layer.
